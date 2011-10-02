@@ -3,30 +3,33 @@
 # handle redirects and to log each redirect.
 #
 
-import urllib2
+import urllib2, httplib
 
-class myHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
+class myHTTPHandler(urllib2.HTTPHandler):
 
-    # Overriding the function to do something when the urllib2 request
-    # gets a 301 http status
-    def http_error_301(self, req, fp, code, msg, headers):
-        
-        print code
-        print headers
-
-        print "I catch redirections here... Now I need to find a good on how to properly track each hop"
-
-        return urllib2.HTTPRedirectHandler.http_error_302(self, req, fp, code, msg, headers)
+# Overriding the httphandler object of urllib for tracking each hop and page
+# http status code. That will go into the database using the chuwlog library
     
-    # I want this behavior for 301 and 302 only.
+    def http_open(self, req):
+        
+        # Do the request the same way urllib2 originally does
+        respond = self.do_open(httplib.HTTPConnection, req)
 
-    http_error_302 = http_error_301
+        try:
+            url = req.redirect_dict[-1] # This in case a redirection exist
+        except:
+            url = req.get_full_url()    # This in case it's the first petition
+       
+        print url
+        print respond.code
+        return respond
+
 
 # I create the urllib2 opener here and I'll call it from somewhere else
 
 def createOpener():
     
-    opener = urllib2.build_opener(myHTTPRedirectHandler)
+    opener = urllib2.build_opener(myHTTPHandler)
     urllib2.install_opener(opener)
 
     return urllib2
