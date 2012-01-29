@@ -12,13 +12,17 @@ baseurl = ""
 
 class myHTTPHandler(urllib2.HTTPHandler):
 
+    def __init__(self):
+        urllib2.HTTPHandler.__init__(self)
+        self.logger = chuwlog.Logwork("/home/chuy/development/chuwler/testdb.sqlite3")
+        self.baseurl = ""
+
 # Overriding the httphandler object of urllib for tracking each hop and page
 # http status code. That will go into the database using the chuwlog library
     
     def http_open(self, req):
 
         # Do the request the same way urllib2 originally does
-        global baseurl
 
         respond = ""
 
@@ -27,21 +31,21 @@ class myHTTPHandler(urllib2.HTTPHandler):
         except urllib2.URLError as e:
             try:
                 hopnum = str(len(req.redirect_dict))
-                urlLog = [req.get_full_url(),e.args[0][1]] 
-                logger.logHop(urlLog,baseurl,hopnum)
+                urlog = [req.get_full_url(),e.args[0][1]] 
+                self.logger.logHop(urlog,self.baseurl,hopnum)
             
             except:
-                baseurl = req._Request__original
-                logger.createEntry(req.get_full_url(),e.args[0][1])
+                self.baseurl = req._Request__original
+                self.logger.createEntry(req.get_full_url(),e.args[0][1])
             raise
 
         try:
             hopnum = str(len(req.redirect_dict))
-            urlLog = [req.get_full_url(),respond.code] 
-            logger.logHop(urlLog,baseurl,hopnum)
+            urlog = [req.get_full_url(),respond.code] 
+            self.logger.logHop(urlog,self.baseurl,hopnum)
 
         except:
-            baseurl = req._Request__original
+            self.baseurl = req._Request__original
             logger.createEntry(req.get_full_url(),respond.code)
 
         return respond
@@ -51,11 +55,10 @@ class myHTTPSHandler(urllib2.HTTPSHandler):
     def https_open(self, req):
         # Do the request the same way urllib2 originally does
         respond = self.do_open(httplib.HTTPSConnection, req)
-        global baseurl
         try:
             hopnum = str(len(req.redirect_dict))
-            urlLog = [req.get_full_url(),respond.code] 
-            logger.logHop(urlLog,baseurl,hopnum)
+            urlog = [req.get_full_url(),respond.code] 
+            self.logger.logHop(urlLog,self.baseurl,hopnum)
 
         except:
             baseurl = req._Request__original
