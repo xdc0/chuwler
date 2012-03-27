@@ -51,6 +51,20 @@ class startScrap():
             except:
                 # I need proper exception handling here
                 print "Some exception found"
+    def scrapsinglelink(self,url):
+        """Main function to initiate the process, it starts by
+        reading the URL and going through all the methods above.
+        This need to be further developed, modified, or even removed
+        this is intended to be a temporary main method for testing
+        the program itself"""
+
+        navigate = chuwlib.createOpener()
+        render = navigate.urlopen(url)
+        parse = html.parse(render)
+
+        setlinksforcheck = self.retrieveLinksFromHTML(parse)
+        setlinksforcheck = self.parseLinks(setlinksforcheck)
+        self.evaluateLinks(setlinksforcheck)
 
     def scrapwl(self):
         """Main function to initiate the process, it starts by
@@ -66,13 +80,15 @@ class startScrap():
         parse = html.parse(render)
 
         setlinksforcheck = self.retrieveLinksFromHTML(parse)
-        print str(len(setlinksforcheck)) + " Links found."
         setlinksforcheck = self.parseLinks(setlinksforcheck)
-        print str(len(setlinksforcheck)) + " UNIQUE Links found."
         self.evaluateLinks(setlinksforcheck)
 
+        for link in setlinksforcheck:
+            self.scrapsinglelink(link)
+
+
 if __name__ == '__main__':
-    #url = "http://www.afrigeneas.com"
-    url = "http://en.wikipedia.org/wiki/Main_Page"
+    url = "http://www.afrigeneas.com"
+    #url = "http://www.google.com.mx"
     x = startScrap(url)
     x.scrapwl()
