@@ -4,7 +4,6 @@
 
 from chuwler import chuwlib
 from lxml import html
-import urllib2
 
 class startScrap():
 
