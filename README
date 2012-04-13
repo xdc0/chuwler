@@ -9,3 +9,13 @@ to do this are:
 
 I hope I'll create an usable application within the near future. I'll add
 more important stuff here eventually :)
+
+REQUIREMETS
+
+Python 2.7
+
+-- Python Packages --
+lxml
+sqlite3
+
+You can install the above packages using pypi2.
