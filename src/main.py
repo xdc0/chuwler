@@ -4,11 +4,12 @@
 
 from chuwler import chuwlib
 from lxml import html
+import re
 
 class startScrap():
 
     def __init__(self,baseurl):
-        self.baseurl = baseurl
+        self.baseurl = baseurl.rstrip('/')
         self.setparsedlinks = set ()
         self.navigate = chuwlib.createOpener()
 
@@ -25,20 +26,26 @@ class startScrap():
         relative or have exactly the same root"""
 
         rootrelativelinks = raw_html.xpath("//a[starts-with(@href,'/')]/@href")
-        for index,hrefValue in enumerate(rootrelativelinks):
-            rootrelativelinks[index] = self.baseurl+hrefValue
-
         otherlinks = raw_html.xpath("//a[re:match(@href,'^[A-Za-z]+.html$')]/@href",namespaces={"re": "http://exslt.org/regular-expressions"})
-        for index,hrefValue in enumerate(otherlinks):
-            otherlinks[index] = self.baseurl+hrefValue
-
         linkswithbaseurl = raw_html.xpath("//a[starts-with(@href,'"+self.baseurl+"')]/@href")
 
         setuniquelinks = set(rootrelativelinks)
-        setuniquelinks = setuniquelinks.union(set(linkswithbaseurl))
         setuniquelinks = setuniquelinks.union(set(otherlinks))
 
+        setuniquelinks = self.sanitizeUrl(setuniquelinks)
+
+        setuniquelinks = setuniquelinks.union(set(linkswithbaseurl))
+
         return setuniquelinks
+
+    def sanitizeUrl(self,uri_set):
+        sanitized = set()
+        for uri in uri_set:
+            if not re.match("^/",uri):
+                uri = "/"+uri
+            sanitized.add(self.baseurl+uri)
+
+        return sanitized
 
     def evaluateLinks(self,setlinkstoevauluate):
         """Evaluates each link given from the argument, the argument is a set
@@ -80,9 +87,9 @@ class startScrap():
 
 
 if __name__ == '__main__':
-    url = "http://www.afrigeneas.com"
+    #url = "http://www.afrigeneas.com"
     #url = "http://bay12games.com/"
-    #url = "http://www.google.com.mx"
+    url = "http://www.google.com.mx"
     #url = "http://en.wikipedia.org"
     x = startScrap(url)
     x.scrapwl()
